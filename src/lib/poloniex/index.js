@@ -3,7 +3,6 @@ const axios = require('axios');
 
 module.exports = (() => {
     function getCurrencyPairName(id) {
-        console.log('id: ' + id + 'string: ' + currencyPairMap[id.toString()]);
         return currencyPairMap[id.toString()];
     }
 
@@ -30,7 +29,6 @@ module.exports = (() => {
         data.forEach((value, idx) => {
             // set the name value
             if (idx === 0) {
-                console.log('0');
                 object.name = getCurrencyPairName(value);
                 return;
             }

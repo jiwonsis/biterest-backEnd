@@ -9,33 +9,6 @@ const { parseJSON, polyfill } = require('../lib/common');
 db.connect();
 socket.connect();
 
-const messageHandler = {
-    1002: async (data) => {
-        if (!data) return;
-        const converted = poloniex.convertToTickerObject(data);
-        const { name } = converted;
-        const rest = polyfill.objectWithoutProperties(converted, 'name');
-
-        try {
-            const updated = await ExchangeRate.updateTicker(name, rest);
-            console.log('updated : ' + updated);
-        } catch (e) {
-            console.error(e);
-        }
-    }
-};
-
-socket.handleMessage = (message) => {
-    const parsed = parseJSON(message);
-    if (!parsed) {
-        return null;
-    }
-    const [type, meta, data] = parsed;
-    if (messageHandler[type]) {
-        messageHandler[type](data);
-    }
-};
-
 async function registerInitialExchangeRate () {
     const tickers = await poloniex.getTickers();
 
@@ -59,6 +32,59 @@ async function registerInitialExchangeRate () {
     }
 
     console.log('success!');
-}
+};
 
-registerInitialExchangeRate();
+async function updateEntireRate() {
+    const tickers = await poloniex.getTickers();
+    const keys = Object.keys(tickers);
+
+    const promise = keys.map(
+        key => {
+            return ExchangeRate.updateTicker(key, tickers[key]);
+        }
+    );
+
+    try {
+        await Promise.all(promise);
+    } catch (e) {
+        console.error('Oops! failed to update Entire Rate');
+        return;
+    }
+
+    console.log('Update entire rate');
+
+};
+
+const messageHandler = {
+    1002: async (data) => {
+        if (!data) return;
+        const converted = poloniex.convertToTickerObject(data);
+        const { name } = converted;
+        const rest = polyfill.objectWithoutProperties(converted, 'name');
+
+        try {
+            const updated = await ExchangeRate.updateTicker(name, rest);
+            console.log('[Update]', name, new Date());
+        } catch (e) {
+            console.error(e);
+        }
+    }
+};
+
+socket.handleMessage = (message) => {
+    const parsed = parseJSON(message);
+    if (!parsed) {
+        return null;
+    }
+    const [type, meta, data] = parsed;
+    if (messageHandler[type]) {
+        messageHandler[type](data);
+    }
+};
+
+socket.handleRefresh = () => {
+    updateEntireRate();
+};
+
+// registerInitialExchangeRate();
+updateEntireRate();

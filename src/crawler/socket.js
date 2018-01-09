@@ -3,6 +3,7 @@ const WebSocket = require('ws');
 module.exports = (() => {
     let _client = null;
     let _messageHandler = (message) => { console.warn('messageHandler not defined'); };
+    let _refreshHandler = () => { console.warn('refreshHandler not defined'); };
 
     const handlers = {
         open: () => {
@@ -30,6 +31,9 @@ module.exports = (() => {
     return {
         set handleMessage(messageHandler) {
             _messageHandler = messageHandler;
+        },
+        set handleRefrash(refreshHandler) {
+            _refreshHandler = refreshHandler;
         },
         connect,
         get getClient() {
