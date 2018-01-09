@@ -1,11 +1,11 @@
 module.exports = function parseJSON(str) {
-    let parsed = null;
+  let parsed = null;
 
-    try {
-        parsed = JSON.parse(str);
-    } catch (e) {
-        return null;
-    }
+  try {
+    parsed = JSON.parse(str);
+  } catch (e) {
+    return null;
+  }
 
-    return parsed;
+  return parsed;
 };

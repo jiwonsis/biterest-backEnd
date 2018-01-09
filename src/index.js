@@ -1,7 +1,7 @@
 // load enviroment variables
 require('dotenv').config();
 const {
-    PORT: port
+  PORT: port
 } = process.env;
 
 const Koa = require('koa');
@@ -16,9 +16,9 @@ const app = new Koa();
 app.use(router.routes());
 app.use(router.allowedMethods());
 app.use(ctx => {
-    ctx.body = 'Hello biterest';
+  ctx.body = 'Hello biterest';
 });
 
 app.listen(port, () => {
-    console.log(`biterest server is listening to port: ${port}`);
+  console.log(`biterest server is listening to port: ${port}`);
 });

@@ -3,7 +3,7 @@ module.exports = {
     'rules': {
         'indent': [
             'warn',
-            4
+            2
         ],
         'semi': [
             'error',
