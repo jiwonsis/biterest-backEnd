@@ -1,5 +1,11 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
+const { PASSWORD_HASH_KEY: secret } = process.env;
+const crypto = require('crypto');
+
+function hash(password) {
+  return crypto.createHmac('sha256', secret).update(password).digest('hex');
+}
 
 const User = new Schema({
   displayName: String,
@@ -18,7 +24,38 @@ const User = new Schema({
   createAt: {
     type: Date,
     default: Date.now
+  },
+  metaInfo: {
+    activated: Boolean
   }
 });
 
-module.exports = mongoose.Model('User', User);
+User.statics.findByEmail = function(email) {
+  return this.findOne({email}).exec();
+};
+
+User.statics.findByDisplayName = function(displayName) {
+  return this.findOne({displayName}).exec();
+};
+
+User.statics.findExistancy = function({email, displayName}) {
+  return this.findOne({
+    $or: [
+      {email},
+      {displayName}
+    ]
+  }).exec();
+};
+
+User.statics.localRegister = function({ 
+  displayName, email, password
+}) {
+  const user = new this({
+    displayName,
+    email,
+    password: hash(password)
+  });
+  return user.save();
+};
+
+module.exports = mongoose.model('User', User);
