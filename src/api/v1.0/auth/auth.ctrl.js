@@ -1,6 +1,5 @@
 const Joi = require('joi');
 const User = require('db/models/User');
-const token = require('lib/token');
 
 // register logic
 exports.localRegister = async (ctx) => {
@@ -39,7 +38,11 @@ exports.localRegister = async (ctx) => {
       displayName, email, password
     });
 
-    ctx.body = user;
+    ctx.body = {
+      displayName,
+      _id: user._id,
+      metaInfo: user.metaInfo
+    };
 
     let accessToken = await user.generateToken();
 
@@ -89,7 +92,27 @@ exports.localLogin = async (ctx) => {
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24 * 7
     });
+
+    const { displayName, _id, metaInfo } = user;
+    ctx.body = {
+      displayName,
+      _id,
+      metaInfo
+    };
   } catch(e) {
     ctx.throw(e);
   }
+};
+
+exports.check = (ctx) => {
+  const { user } = ctx.request;
+
+  if(!user) {
+    ctx.status = 403;
+    return;
+  }
+
+  ctx.body = {
+    user
+  };
 };

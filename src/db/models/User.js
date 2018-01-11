@@ -27,7 +27,7 @@ const User = new Schema({
     default: Date.now
   },
   metaInfo: {
-    activated: Boolean
+    activated: { type: Boolean, default: false }
   }
 });
 
@@ -61,7 +61,6 @@ User.statics.localRegister = function({
 
 User.methods.validatePassword = function(password) {
   const hashed = hash(password);
-  console.log('hash: %s, pw: %s', hashed, this.password);
   return this.password === hashed;
 };
 
