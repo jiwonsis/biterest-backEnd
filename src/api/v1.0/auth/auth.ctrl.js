@@ -1,6 +1,24 @@
 const Joi = require('joi');
 const User = require('db/models/User');
 
+exports.checkEmail = async (ctx) => {
+  const { email } = ctx.params;
+
+  if (!email) {
+    ctx.status = 400;
+    return;
+  }
+
+  try {
+    const account = await User.findByEmail(email);
+    ctx.body = {
+      exists: !!account // !: change boolean type || !!: null check null ? false : true
+    };
+  } catch (e) {
+    ctx.throw(e, 500);
+  }
+};
+
 // register logic
 exports.localRegister = async (ctx) => {
   const { body } = ctx.request;
@@ -51,7 +69,7 @@ exports.localRegister = async (ctx) => {
       maxAge: 1000 * 60 * 60 * 24 * 7
     });
   } catch (e) {
-    ctx.throw(500);
+    ctx.throw(e, 500);
   }
 };
 
@@ -100,7 +118,7 @@ exports.localLogin = async (ctx) => {
       metaInfo
     };
   } catch(e) {
-    ctx.throw(e);
+    ctx.throw(e, 500);
   }
 };
 
