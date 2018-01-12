@@ -1,6 +1,24 @@
 const Joi = require('joi');
 const User = require('db/models/User');
 
+exports.checkDisplayName = async (ctx) => {
+  const { displayName } = ctx.params;
+
+  if (!displayName) {
+    ctx.status = 400;
+    return;
+  }
+
+  try {
+    const account = await User.findByDisplayName(displayName);
+    ctx.body = {
+      exists: !!account // !: change boolean type || !!: null check null ? false : true
+    };
+  } catch(e) {
+    ctx.throw(e, 500);
+  }
+};
+
 exports.checkEmail = async (ctx) => {
   const { email } = ctx.params;
 
