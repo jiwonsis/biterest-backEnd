@@ -25,7 +25,7 @@ function decodeToken(token) {
       });
     }
   );
-}
+};
 
 exports.generateToken = generateToken;
 exports.decodeToken = decodeToken;

@@ -1,5 +1,6 @@
 const Joi = require('joi');
 const User = require('db/models/User');
+const { optionsPerCurrency } = require('lib/variables');
 
 exports.checkDisplayName = async (ctx) => {
   const { displayName } = ctx.params;
@@ -42,9 +43,13 @@ exports.localRegister = async (ctx) => {
   const { body } = ctx.request;
 
   const schema = Joi.object({
-    displayName: Joi.string().regex(/^[a-zA-Z0-9ㄱ-힣]{3,10}$/).required(),
+    displayName: Joi.string().regex(/^[a-zA-Z0-9ㄱ-힣]{3,12}$/).required(),
     email: Joi.string().email().required(),
-    password: Joi.string().min(6).max(30)
+    password: Joi.string().min(6).max(30),
+    initialMoney: Joi.object({
+      currency: Joi.string().allow('BTC', 'USD', 'BTC').required(),
+      index: Joi.number().min(0).max(2).required()
+    }).required()
   });
 
   const result = Joi.validate(body, schema);
@@ -52,8 +57,7 @@ exports.localRegister = async (ctx) => {
   // Schema Error
   if(result.error) {
     ctx.status = 400;
-    ctx.body = result.error.details[0].message;
-    return;
+    ctx.body = result.error;
   }
 
   const { displayName, email, password } = body;
@@ -69,10 +73,21 @@ exports.localRegister = async (ctx) => {
       ctx.body = { key };
       return;
     }
+
+    const { currency, index } = body.initialMoney;
+    
+    const value = optionsPerCurrency[currency].initialValue * Math.pow(10, index);
+    const initial = {
+      currency,
+      value
+    };
+
     // create user account
     const user = await User.localRegister({
-      displayName, email, password
+      displayName, email, password, initial
     });
+
+    console.log(user);
 
     ctx.body = {
       displayName,
@@ -121,6 +136,7 @@ exports.localLogin = async (ctx) => {
     if (!validated) {
       // wrong password
       ctx.status = 403;
+      return;
     }
 
     let accessToken = await user.generateToken();

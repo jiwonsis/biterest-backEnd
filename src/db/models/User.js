@@ -8,6 +8,12 @@ function hash(password) {
   return crypto.createHmac('sha256', secret).update(password).digest('hex');
 }
 
+const Wallet = new Schema({
+  BTC: Schema.Types.Double,
+  USD: Schema.Types.Double,
+  KRW: Schema.Types.Double
+});
+
 const User = new Schema({
   displayName: String,
   email: String,
@@ -22,12 +28,20 @@ const User = new Schema({
     }
   },
   password: String,
-  createAt: {
+  createdAt: {
     type: Date,
     default: Date.now
   },
   metaInfo: {
-    activated: { type: Boolean, default: false }
+
+  },
+  wallet: {
+    type: Wallet,
+    default: {
+      BTC: 0,
+      KRW: 0, 
+      USD: 0
+    }
   }
 });
 
@@ -49,13 +63,21 @@ User.statics.findExistancy = function({email, displayName}) {
 };
 
 User.statics.localRegister = function({ 
-  displayName, email, password
+  displayName, email, password, initial
 }) {
   const user = new this({
     displayName,
     email,
-    password: hash(password)
+    password: hash(password),
+    metaInfo: {
+      initial
+    }
   });
+
+  // sets initial money
+  const { currency, value } = initial;
+  user.wallet[currency] = value;
+
   return user.save();
 };
 
