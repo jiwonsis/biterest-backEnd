@@ -12,9 +12,9 @@ socket.connect();
 async function registerInitialExchangeRate () {
   const tickers = await poloniex.getTickers();
 
-  // removes all the data form the collection (only for temporary use)
+  // removes all the data from the collection (only for temporary use)
   await ExchangeRate.drop();
-  console.log('dropped exchagerate collection');
+  console.log('dropped exchangerate collection');
   const keys = Object.keys(tickers);
   const promises = keys.map(
     key => {
@@ -28,24 +28,24 @@ async function registerInitialExchangeRate () {
   try {
     await Promise.all(promises);
   } catch (e) {
-    console.error(e);
+    console.log(e);
   }
 
-  console.log('success!');
+  console.log('succeed!');
 };
 
 async function updateEntireRate() {
   const tickers = await poloniex.getTickers();
   const keys = Object.keys(tickers);
 
-  const promise = keys.map(
+  const promises = keys.map(
     key => {
       return ExchangeRate.updateTicker(key, tickers[key]);
     }
   );
 
   try {
-    await Promise.all(promise);
+    await Promise.all(promises);
   } catch (e) {
     console.error('Oops! failed to update Entire Rate');
     return;
@@ -85,5 +85,6 @@ socket.handleRefresh = () => {
   updateEntireRate();
 };
 
-// registerInitialExchangeRate();
-updateEntireRate();
+// updateEntireRate();
+
+registerInitialExchangeRate();

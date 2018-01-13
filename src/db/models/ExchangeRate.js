@@ -11,7 +11,7 @@ const ExchangeRate = new Schema({
   baseVolume: Types.Double,
   quoteVolume: Types.Double,
   isFrozen: Types.Double,
-  hight24hr: Types.Double,
+  high24hr: Types.Double,
   low24hr: Types.Double,
   lastUpdated: {
     type: Date,

@@ -11,7 +11,7 @@ module.exports = async (ctx, next) => {
   try {
     const decoded = await decodeToken(token);
     const { user } = decoded;
-    // re-issue token when its age is over 4 days
+    // re-issue token when its age is over 3 days
     if(Date.now() / 1000 - decoded.iat > 60 * 60 * 24 * 3) {
       const freshToken = await generateToken({ user }, 'user');
       ctx.cookies.set('access_token', freshToken, {
@@ -20,7 +20,7 @@ module.exports = async (ctx, next) => {
     }
 
     ctx.request.user = user;
-  } catch (error) {
+  } catch (e) {
     ctx.request.user = null;
   }
 
