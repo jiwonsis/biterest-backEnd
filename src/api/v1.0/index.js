@@ -1,7 +1,10 @@
 const Router = require('koa-router');
 const auth = require('./auth');
+const wallet = require('./wallet');
 
-const v10 = new Router();
-v10.use('/auth', auth.routes());
+const api = new Router();
 
-module.exports = auth;
+api.use('/auth', auth.routes());
+api.use('/wallet', wallet.routes());
+
+module.exports = api;
