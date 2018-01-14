@@ -10,5 +10,6 @@ auth.post('/register/local', authCtrl.localRegister);
 auth.post('/login/local', authCtrl.localLogin);
 auth.get('/check', authCtrl.check);
 auth.post('/logout', authCtrl.logout);
+auth.post('/login/:provider(facebook|google)', authCtrl.socialLogin);
 
 module.exports = auth;

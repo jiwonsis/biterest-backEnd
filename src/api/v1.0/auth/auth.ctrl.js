@@ -1,6 +1,7 @@
 const Joi = require('joi');
 const User = require('db/models/User');
 const { optionsPerCurrency } = require('lib/variables');
+const { getProfile } = require('lib/social');
 
 exports.checkDisplayName = async (ctx) => {
   const { displayName } = ctx.params;
@@ -58,6 +59,7 @@ exports.localRegister = async (ctx) => {
   if(result.error) {
     ctx.status = 400;
     ctx.body = result.error;
+    return;
   }
 
   const { displayName, email, password } = body;
@@ -154,6 +156,34 @@ exports.localLogin = async (ctx) => {
   } catch(e) {
     ctx.throw(e, 500);
   }
+};
+
+exports.socialLogin = async (ctx) => {
+  const schema = Joi.object().keys({
+    accessToken: Joi.string().required()
+  });
+
+  const result = Joi.validate(ctx.request.body, schema);
+
+  if(result.error) {
+    ctx.status = 400;
+    ctx.body = result.error.message;
+    return;
+  }
+
+  const { provider } = ctx.params;
+  const { accessToken } = ctx.request.body;
+
+  // get social info
+  let profile = null;
+  try {
+    profile = await getProfile(provider, accessToken);
+  } catch (e) {
+    ctx.status = 403;
+    return;
+  }
+
+  ctx.body = { profile };
 };
 
 exports.check = (ctx) => {
