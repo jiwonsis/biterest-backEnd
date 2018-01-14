@@ -203,6 +203,8 @@ exports.socialLogin = async (ctx) => {
 
   if(user) {
     // TODO: if account exists, set JWT and return userInfo
+    ctx.status = 200;
+    ctx.body = '가입된 계정있음';
     return;
   }
   
