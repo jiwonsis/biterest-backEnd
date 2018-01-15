@@ -202,33 +202,63 @@ exports.socialLogin = async (ctx) => {
   }
 
   if(user) {
-    // TODO: if account exists, set JWT and return userInfo
-    ctx.status = 200;
-    ctx.body = '가입된 계정있음';
+    // set user status
+    try {
+      const btmToken = await user.generateToken();
+      ctx.cookies.set('access_token', btmToken, {
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60 * 24 * 7
+      });
+    } catch (e) {
+      ctx.throw(e, 500);
+    }     
+    const { _id, displayName } = user;
+    ctx.body = {
+      displayName,
+      _id
+    };    
     return;
   }
   
-  let duplicated = null;
   if(!user && profile.email) {
+    let duplicated = null;
     try {
       duplicated = await User.findByEmail(email);
     } catch (e) {
       ctx.throw(e, 500);
     }
-  }
 
-  // if there is a duplicated email, merges the user account
-  if(duplicated) {
-    duplicated.social[provider] = {
-      id,
-      accessToken
-    };
-    try {
-      await duplicated.save();
-    } catch (e) {
-      ctx.throw(e, 500);
+    // if there is a duplicated email, merges the user account
+    if(duplicated) {
+      duplicated.social[provider] = {
+        id,
+        accessToken
+      };
+      try {
+        await duplicated.save();
+      } catch (e) {
+        ctx.throw(e, 500);
+      }
+
+      // set user status
+      if(user) {
+        try {
+          const dtmToken = await user.generateToken();
+          ctx.cookies.set('access_token', dtmToken, {
+            httpOnly: true,
+            maxAge: 1000 * 60 * 60 * 24 * 7
+          });
+        } catch (e) {
+          ctx.throw(e, 500);
+        }
+        const { _id, displayName } = user;
+        ctx.body = {
+          displayName,
+          _id
+        };
+        return;
+      }
     }
-    // TODO: set JWT and return account info
   }
 
   if(!user) {
