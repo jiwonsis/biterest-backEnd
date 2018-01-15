@@ -254,7 +254,7 @@ exports.socialRegister = async (ctx) => {
   const { provider } = ctx.params;
 
   // check schema
-  const schema = Joi.validate({
+  const schema = Joi.object({
     displayName: Joi.string().regex(/^[a-zA-Z0-9ㄱ-힣]{3,12}$/).required(),
     accessToken: Joi.string().required(),
     initialMoney: Joi.object({
@@ -262,12 +262,13 @@ exports.socialRegister = async (ctx) => {
       index: Joi.number().min(0).max(2).required()
     }).required()
   });
-
+  
   const result = Joi.validate(body, schema);
-
+  
   if(result.error) {
     ctx.status = 400;
     ctx.body = result.error;
+    
     return;
   }
 
@@ -301,6 +302,7 @@ exports.socialRegister = async (ctx) => {
     // service allows social accounts without email .. for now
     try {
       const exists = await User.findByEmail(profile.email);
+      console.log(exists);
       if(exists) {
         ctx.body = {
           key: 'email'
